@@ -631,7 +631,7 @@ export default function TheGrid() {
             }}
             title="Disconnect"
           >
-            {address.slice(0, 6)}…{address.slice(-4)} ✕
+            {address?.slice(0, 6)}…{address?.slice(-4)} ✕
           </button>
         </div>
       </header>

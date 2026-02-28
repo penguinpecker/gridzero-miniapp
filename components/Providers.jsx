@@ -1,21 +1,25 @@
 "use client";
-import { MiniKitProvider } from "@coinbase/onchainkit/minikit";
+import { WagmiProvider, createConfig, http } from "wagmi";
 import { base } from "wagmi/chains";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { farcasterFrame } from "@farcaster/frame-wagmi-connector";
+
+const config = createConfig({
+  chains: [base],
+  connectors: [farcasterFrame()],
+  transports: {
+    [base.id]: http("https://mainnet.base.org"),
+  },
+});
+
+const queryClient = new QueryClient();
 
 export function Providers({ children }) {
   return (
-    <MiniKitProvider
-      chain={base}
-      rpcUrl="https://mainnet.base.org"
-      config={{
-        appearance: {
-          mode: "dark",
-          name: "GridZero",
-          logo: process.env.NEXT_PUBLIC_URL ? `${process.env.NEXT_PUBLIC_URL}/icon.png` : undefined,
-        },
-      }}
-    >
-      {children}
-    </MiniKitProvider>
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
+    </WagmiProvider>
   );
 }

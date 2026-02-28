@@ -1,9 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useAccount, useSendTransaction } from "wagmi";
-import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownDisconnect } from "@coinbase/onchainkit/wallet";
-import { Avatar, Name } from "@coinbase/onchainkit/identity";
-import { useComposeCast } from "@coinbase/onchainkit/minikit";
+import { useAccount, useSendTransaction, useDisconnect, useConnect } from "wagmi";
+import sdk from "@farcaster/frame-sdk";
 import { useResolverSSE } from "@/lib/useResolverSSE";
 import { createPublicClient, http, fallback, encodeFunctionData, parseUnits } from "viem";
 import { base } from "viem/chains";
@@ -134,7 +132,8 @@ export default function TheGrid() {
   // MiniKit: useAccount replaces usePrivy, useSendTransaction replaces manual walletClient
   const { address, isConnected } = useAccount();
   const { sendTransactionAsync } = useSendTransaction();
-  const composeCast = useComposeCast();
+  const { disconnect } = useDisconnect();
+  const { connect, connectors } = useConnect();
 
   // Contract state — identical to original
   const [round, setRound] = useState(0);
@@ -556,7 +555,7 @@ export default function TheGrid() {
   // ─── Share win on Farcaster ───
   const shareWin = () => {
     try {
-      composeCast({
+      sdk.actions.composeCast({
         text: `🏆 Won on GridZero! Cell ${CELL_LABELS[winningCell]} | Round #${round} | Pot $${fmt(potSize)}\n\nPick a cell. Beat the grid. Win USDC. ⚡`,
         embeds: [process.env.NEXT_PUBLIC_URL || "https://gridzero-miniapp.vercel.app"],
       });
@@ -623,21 +622,30 @@ export default function TheGrid() {
             </>
           )}
           {!isConnected ? (
-            <Wallet>
-              <ConnectWallet>
-                <span style={S.loginBtn}>⚡ CONNECT</span>
-              </ConnectWallet>
-            </Wallet>
+            <button
+              onClick={() => connect({ connector: connectors[0] })}
+              style={S.loginBtn}
+            >
+              ⚡ CONNECT
+            </button>
           ) : (
-            <Wallet>
-              <ConnectWallet>
-                <Avatar style={{ width: 20, height: 20 }} />
-                <Name style={{ fontSize: 10 }} />
-              </ConnectWallet>
-              <WalletDropdown>
-                <WalletDropdownDisconnect />
-              </WalletDropdown>
-            </Wallet>
+            <button
+              onClick={() => disconnect()}
+              style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 10,
+                padding: "4px 8px",
+                borderRadius: 4,
+                border: "1px solid rgba(22,82,240,0.3)",
+                background: "rgba(22,82,240,0.08)",
+                color: "#7a8b9e",
+                cursor: "pointer",
+                letterSpacing: 0.5,
+              }}
+              title="Disconnect"
+            >
+              {address.slice(0, 6)}…{address.slice(-4)} ✕
+            </button>
           )}
         </div>
       </header>

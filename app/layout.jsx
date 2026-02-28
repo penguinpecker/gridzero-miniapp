@@ -1,6 +1,6 @@
 import { Providers } from "@/components/Providers";
 
-const APP_URL = process.env.NEXT_PUBLIC_URL ?? "https://gridzero.vercel.app";
+const APP_URL = process.env.NEXT_PUBLIC_URL ?? "https://gridzero-miniapp.vercel.app";
 
 export async function generateMetadata() {
   return {

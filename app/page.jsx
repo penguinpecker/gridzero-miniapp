@@ -1,10 +1,9 @@
 "use client";
 import { useEffect } from "react";
-import { useMiniKit } from "@coinbase/onchainkit/minikit";
+import sdk from "@farcaster/frame-sdk";
 import TheGrid from "@/components/TheGrid";
 
 export default function Page() {
-  const { setFrameReady, isFrameReady } = useMiniKit();
-  useEffect(() => { if (!isFrameReady) setFrameReady(); }, [setFrameReady, isFrameReady]);
+  useEffect(() => { sdk.actions.ready(); }, []);
   return <TheGrid />;
 }

@@ -9,8 +9,7 @@ const config = createConfig({
   connectors: [farcasterFrame()],
   transports: {
     [base.id]: fallback([
-      http("https://base-mainnet.g.alchemy.com/v2/demo"),
-      http("https://1rpc.io/base"),
+      http("https://base-mainnet.g.alchemy.com/v2/r6XQwbj3aRRGWp-oJkR7f"),
       http("https://mainnet.base.org"),
     ]),
   },

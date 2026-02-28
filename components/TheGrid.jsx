@@ -102,8 +102,7 @@ const publicClient = createPublicClient({
   chain: base,
   batch: { multicall: true },
   transport: fallback([
-    http("https://base-mainnet.g.alchemy.com/v2/demo", { timeout: 8_000, retryCount: 1, retryDelay: 500 }),
-    http("https://1rpc.io/base", { timeout: 8_000, retryCount: 1, retryDelay: 500 }),
+    http("https://base-mainnet.g.alchemy.com/v2/r6XQwbj3aRRGWp-oJkR7f", { timeout: 8_000, retryCount: 1, retryDelay: 500 }),
     http("https://mainnet.base.org", { timeout: 8_000, retryCount: 1, retryDelay: 500 }),
   ]),
 });

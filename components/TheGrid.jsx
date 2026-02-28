@@ -84,7 +84,7 @@ const USDC_ADDR = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const CELL_COST = "1";
 const CELL_COST_RAW = 1000000n;
 const ROUND_DURATION = 60;
-const PICK_BUFFER = 5; // seconds before endTime to disable picks (tx needs time to land on-chain)
+const PICK_BUFFER = 8; // seconds before endTime to disable picks (tx needs time to land on-chain)
 const GRID_SIZE = 5;
 const TOTAL_CELLS = GRID_SIZE * GRID_SIZE;
 const SUPABASE_URL = "https://dqvwpbggjlcumcmlliuj.supabase.co";
@@ -506,6 +506,14 @@ export default function TheGrid() {
         abi: USDC_ABI, functionName: "approve",
         args: [GRID_ADDR, parseUnits("1000000", 6)],
       });
+      // Simulate first to catch issues before wallet popup
+      try {
+        await publicClient.call({ account: address, to: USDC_ADDR, data: approveData });
+      } catch (simErr) {
+        setError("USDC approval failed to simulate — check your wallet");
+        setApproving(false);
+        return;
+      }
       const hash = await sendTransactionAsync({ to: USDC_ADDR, data: approveData });
       await publicClient.waitForTransactionReceipt({ hash });
       setUsdcApproved(true);
@@ -533,6 +541,21 @@ export default function TheGrid() {
       const data = encodeFunctionData({
         abi: GRID_ABI, functionName: "pickCell", args: [cellIndex],
       });
+      // Simulate locally first to catch reverts before the wallet shows a scary error
+      try {
+        await publicClient.call({ account: address, to: GRID_ADDR, data });
+      } catch (simErr) {
+        const reason = simErr.shortMessage || simErr.message || "";
+        if (reason.includes("Round ended")) {
+          setError("Round just ended — wait for the next round!");
+        } else if (reason.includes("Already joined")) {
+          setError("You already picked this round!");
+        } else {
+          setError(reason.slice(0, 100) || "Transaction would fail — try next round");
+        }
+        setClaiming(false);
+        return;
+      }
       addFeed(`◈ Claiming cell ${CELL_LABELS[cellIndex]}...`);
       const hash = await sendTransactionAsync({ to: GRID_ADDR, data });
       await publicClient.waitForTransactionReceipt({ hash });

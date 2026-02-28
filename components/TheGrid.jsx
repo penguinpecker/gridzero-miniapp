@@ -86,6 +86,7 @@ const USDC_ADDR = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const CELL_COST = "1";
 const CELL_COST_RAW = 1000000n;
 const ROUND_DURATION = 60;
+const PICK_BUFFER = 5; // seconds before endTime to disable picks (tx needs time to land on-chain)
 const GRID_SIZE = 5;
 const TOTAL_CELLS = GRID_SIZE * GRID_SIZE;
 const SUPABASE_URL = "https://dqvwpbggjlcumcmlliuj.supabase.co";
@@ -521,6 +522,12 @@ export default function TheGrid() {
   // ─── Pick Cell (via wagmi sendTransaction) ───
   const claimCell = async (cellIndex) => {
     if (!address || claiming) return;
+    // Double-check timer hasn't expired while user was tapping
+    const remaining = roundEnd > 0 ? Math.max(0, roundEnd - Date.now() / 1000) : 0;
+    if (remaining <= PICK_BUFFER) {
+      setError("Round closing — too late to pick. Wait for next round!");
+      return;
+    }
     setClaiming(true);
     setError(null);
     try {
@@ -551,7 +558,7 @@ export default function TheGrid() {
     try {
       composeCast({
         text: `🏆 Won on GridZero! Cell ${CELL_LABELS[winningCell]} | Round #${round} | Pot $${fmt(potSize)}\n\nPick a cell. Beat the grid. Win USDC. ⚡`,
-        embeds: [process.env.NEXT_PUBLIC_URL || "https://gridzero.vercel.app"],
+        embeds: [process.env.NEXT_PUBLIC_URL || "https://gridzero-miniapp.vercel.app"],
       });
     } catch {}
   };
@@ -565,6 +572,7 @@ export default function TheGrid() {
     if (resolved) return `ROUND ${round} RESOLVED`;
     if (smoothTime <= 0 && round > 0) return `RESOLVING ROUND ${round}...`;
     if (smoothTime <= 0) return "WAITING...";
+    if (smoothTime <= PICK_BUFFER && isConnected) return `ROUND ${round} — LOCKING...`;
     if (!isConnected) return `ROUND ${round} — CONNECT TO PLAY`;
     return `ROUND ${round} ACTIVE`;
   };
@@ -577,7 +585,7 @@ export default function TheGrid() {
   };
 
   const canClaim = (idx) => {
-    return !resolved && smoothTime > 0 && isConnected && playerCell < 0 && usdcApproved;
+    return !resolved && smoothTime > PICK_BUFFER && isConnected && playerCell < 0 && usdcApproved;
   };
 
   const isWinner = resolved && playerCell >= 0 && playerCell === winningCell;
@@ -756,12 +764,15 @@ export default function TheGrid() {
         )}
 
         {/* Instruction */}
-        {isConnected && usdcApproved && playerCell < 0 && !resolved && smoothTime > 0 && (
+        {isConnected && usdcApproved && playerCell < 0 && !resolved && smoothTime > PICK_BUFFER && (
           <div style={S.instruction}>◆ TAP TO SELECT · DOUBLE-TAP TO CLAIM ◆</div>
+        )}
+        {isConnected && usdcApproved && playerCell < 0 && !resolved && smoothTime > 0 && smoothTime <= PICK_BUFFER && (
+          <div style={{ ...S.instruction, color: "#ff3355" }}>⏱ ROUND CLOSING — PICKS LOCKED</div>
         )}
 
         {/* Claim button */}
-        {selectedCell !== null && !claiming && isConnected && usdcApproved && (
+        {selectedCell !== null && !claiming && isConnected && usdcApproved && smoothTime > PICK_BUFFER && (
           <button style={S.claimBtn} onClick={() => claimCell(selectedCell)}>
             ⬡ LOCK CELL {CELL_LABELS[selectedCell]} — {CELL_COST} USDC
           </button>

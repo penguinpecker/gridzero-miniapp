@@ -3,10 +3,14 @@ import { WagmiProvider, createConfig, http } from "wagmi";
 import { base } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { farcasterFrame } from "@farcaster/frame-wagmi-connector";
+import { coinbaseWallet } from "wagmi/connectors";
 
 const config = createConfig({
   chains: [base],
-  connectors: [farcasterFrame()],
+  connectors: [
+    farcasterFrame(),
+    coinbaseWallet({ appName: "GridZero", chainId: base.id }),
+  ],
   transports: {
     [base.id]: http("https://mainnet.base.org"),
   },

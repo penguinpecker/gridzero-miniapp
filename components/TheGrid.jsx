@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useAccount, useSendTransaction, useDisconnect, useConnect } from "wagmi";
+import { useAccount, useSendTransaction, useDisconnect } from "wagmi";
 import sdk from "@farcaster/frame-sdk";
 import { useResolverSSE } from "@/lib/useResolverSSE";
 import { createPublicClient, http, fallback, encodeFunctionData, parseUnits } from "viem";
@@ -133,7 +133,6 @@ export default function TheGrid() {
   const { address, isConnected } = useAccount();
   const { sendTransactionAsync } = useSendTransaction();
   const { disconnect } = useDisconnect();
-  const { connect, connectors } = useConnect();
 
   // Contract state — identical to original
   const [round, setRound] = useState(0);
@@ -615,38 +614,25 @@ export default function TheGrid() {
           <span style={S.badge}>BASE</span>
         </div>
         <div style={S.hRight}>
-          {isConnected && (
-            <>
-              <span style={S.hStat}>{fmtEth(gridBalance, 2)} <b style={{ color: "#1652F0" }}>ZERO</b></span>
-              <span style={S.hStat}>{fmt(ethBalance, 2)} <b style={{ color: "#3B7BF6" }}>USDC</b></span>
-            </>
-          )}
-          {!isConnected ? (
-            <button
-              onClick={() => connect({ connector: connectors[0] })}
-              style={S.loginBtn}
-            >
-              ⚡ CONNECT
-            </button>
-          ) : (
-            <button
-              onClick={() => disconnect()}
-              style={{
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: 10,
-                padding: "4px 8px",
-                borderRadius: 4,
-                border: "1px solid rgba(22,82,240,0.3)",
-                background: "rgba(22,82,240,0.08)",
-                color: "#7a8b9e",
-                cursor: "pointer",
-                letterSpacing: 0.5,
-              }}
-              title="Disconnect"
-            >
-              {address.slice(0, 6)}…{address.slice(-4)} ✕
-            </button>
-          )}
+          <span style={S.hStat}>{fmtEth(gridBalance, 2)} <b style={{ color: "#1652F0" }}>ZERO</b></span>
+          <span style={S.hStat}>{fmt(ethBalance, 2)} <b style={{ color: "#3B7BF6" }}>USDC</b></span>
+          <button
+            onClick={() => disconnect()}
+            style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: 10,
+              padding: "4px 8px",
+              borderRadius: 4,
+              border: "1px solid rgba(22,82,240,0.3)",
+              background: "rgba(22,82,240,0.08)",
+              color: "#7a8b9e",
+              cursor: "pointer",
+              letterSpacing: 0.5,
+            }}
+            title="Disconnect"
+          >
+            {address.slice(0, 6)}…{address.slice(-4)} ✕
+          </button>
         </div>
       </header>
 

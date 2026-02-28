@@ -1,18 +1,18 @@
 "use client";
-import { WagmiProvider, createConfig, http } from "wagmi";
+import { WagmiProvider, createConfig, http, fallback } from "wagmi";
 import { base } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { farcasterFrame } from "@farcaster/frame-wagmi-connector";
-import { coinbaseWallet } from "wagmi/connectors";
 
 const config = createConfig({
   chains: [base],
-  connectors: [
-    farcasterFrame(),
-    coinbaseWallet({ appName: "GridZero", chainId: base.id }),
-  ],
+  connectors: [farcasterFrame()],
   transports: {
-    [base.id]: http("https://mainnet.base.org"),
+    [base.id]: fallback([
+      http("https://base-mainnet.g.alchemy.com/v2/demo"),
+      http("https://1rpc.io/base"),
+      http("https://mainnet.base.org"),
+    ]),
   },
 });
 

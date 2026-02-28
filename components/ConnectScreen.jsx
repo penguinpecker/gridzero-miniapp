@@ -6,13 +6,10 @@ export default function ConnectScreen() {
   const { connect, connectors, isPending } = useConnect();
   const [error, setError] = useState(null);
 
-  const farcasterConnector = connectors.find(c => c.id === "farcasterFrame");
-  const coinbaseConnector = connectors.find(c => c.id === "coinbaseWalletSDK");
-
-  const handleConnect = async (connector) => {
+  const handleConnect = () => {
     setError(null);
     try {
-      connect({ connector });
+      connect({ connector: connectors[0] });
     } catch (e) {
       setError(e.shortMessage || e.message || "Connection failed");
     }
@@ -51,30 +48,13 @@ export default function ConnectScreen() {
           1 USDC per round · 30s rounds · On-chain on Base.
         </div>
 
-        {/* Connect Buttons */}
-        <div style={styles.buttons}>
-          {farcasterConnector && (
-            <button
-              onClick={() => handleConnect(farcasterConnector)}
-              disabled={isPending}
-              style={styles.btnPrimary}
-            >
-              <span style={{ fontSize: 18 }}>🟣</span>
-              <span>{isPending ? "CONNECTING..." : "CONNECT FARCASTER"}</span>
-            </button>
-          )}
-
-          {coinbaseConnector && (
-            <button
-              onClick={() => handleConnect(coinbaseConnector)}
-              disabled={isPending}
-              style={styles.btnSecondary}
-            >
-              <span style={{ fontSize: 18 }}>🔵</span>
-              <span>{isPending ? "CONNECTING..." : "COINBASE WALLET"}</span>
-            </button>
-          )}
-        </div>
+        <button
+          onClick={handleConnect}
+          disabled={isPending}
+          style={styles.btn}
+        >
+          {isPending ? "⟐ CONNECTING..." : "⚡ CONNECT WALLET"}
+        </button>
 
         {error && (
           <div style={styles.error}>⚠ {error}</div>
@@ -104,7 +84,6 @@ const styles = {
     fontFamily: "'JetBrains Mono', monospace",
     background: "radial-gradient(ellipse at 30% 20%, #0D1A30 0%, #080E1C 50%, #060A14 100%)",
     color: "#c8d6e5",
-    minHeight: "100vh",
     minHeight: "100dvh",
     display: "flex",
     alignItems: "center",
@@ -130,112 +109,40 @@ const styles = {
     maxWidth: 380,
     width: "100%",
   },
-  title: {
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-    marginTop: 8,
-  },
+  title: { display: "flex", alignItems: "center", gap: 8, marginTop: 8 },
   titleGrid: {
-    fontFamily: "'Orbitron', sans-serif",
-    fontWeight: 900,
-    fontSize: 28,
-    color: "#3B7BF6",
-    letterSpacing: 4,
+    fontFamily: "'Orbitron', sans-serif", fontWeight: 900, fontSize: 28,
+    color: "#3B7BF6", letterSpacing: 4,
   },
   titleZero: {
-    fontFamily: "'Orbitron', sans-serif",
-    fontWeight: 500,
-    fontSize: 28,
-    color: "#e0e8f0",
-    letterSpacing: 3,
+    fontFamily: "'Orbitron', sans-serif", fontWeight: 500, fontSize: 28,
+    color: "#e0e8f0", letterSpacing: 3,
   },
   tagline: {
-    fontFamily: "'Orbitron', sans-serif",
-    fontSize: 10,
-    fontWeight: 600,
-    letterSpacing: 3,
-    color: "#3B7BF6",
-    textTransform: "uppercase",
+    fontFamily: "'Orbitron', sans-serif", fontSize: 10, fontWeight: 600,
+    letterSpacing: 3, color: "#3B7BF6", textTransform: "uppercase",
     animation: "scanGlow 3s ease-in-out infinite",
   },
   desc: {
-    fontSize: 12,
-    lineHeight: 1.6,
-    color: "#6a7b8e",
-    textAlign: "center",
-    maxWidth: 300,
+    fontSize: 12, lineHeight: 1.6, color: "#6a7b8e", textAlign: "center", maxWidth: 300,
   },
-  buttons: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 10,
-    width: "100%",
-    marginTop: 8,
-  },
-  btnPrimary: {
-    fontFamily: "'Orbitron', sans-serif",
-    fontSize: 12,
-    fontWeight: 700,
-    padding: "16px 20px",
-    borderRadius: 10,
-    border: "none",
-    background: "linear-gradient(135deg, #1652F0, #3B7BF6)",
-    color: "#fff",
-    cursor: "pointer",
-    letterSpacing: 1.5,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
+  btn: {
+    fontFamily: "'Orbitron', sans-serif", fontSize: 13, fontWeight: 700,
+    padding: "16px 20px", borderRadius: 10, border: "none", width: "100%",
+    background: "linear-gradient(135deg, #1652F0, #3B7BF6)", color: "#fff",
+    cursor: "pointer", letterSpacing: 1.5, marginTop: 8,
     boxShadow: "0 4px 24px rgba(22,82,240,0.35)",
-    transition: "transform 0.1s ease, box-shadow 0.1s ease",
-  },
-  btnSecondary: {
-    fontFamily: "'Orbitron', sans-serif",
-    fontSize: 12,
-    fontWeight: 700,
-    padding: "16px 20px",
-    borderRadius: 10,
-    border: "1px solid rgba(22,82,240,0.3)",
-    background: "rgba(22,82,240,0.08)",
-    color: "#3B7BF6",
-    cursor: "pointer",
-    letterSpacing: 1.5,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-    transition: "transform 0.1s ease, box-shadow 0.1s ease",
   },
   error: {
-    padding: "10px 14px",
-    borderRadius: 6,
-    border: "1px solid rgba(255,51,85,0.3)",
-    background: "rgba(255,51,85,0.08)",
-    color: "#ff3355",
-    fontSize: 11,
-    width: "100%",
-    textAlign: "center",
+    padding: "10px 14px", borderRadius: 6,
+    border: "1px solid rgba(255,51,85,0.3)", background: "rgba(255,51,85,0.08)",
+    color: "#ff3355", fontSize: 11, width: "100%", textAlign: "center",
   },
-  footer: {
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-    marginTop: 16,
-  },
+  footer: { display: "flex", alignItems: "center", gap: 8, marginTop: 16 },
   footerDot: {
-    display: "inline-block",
-    width: 6,
-    height: 6,
-    borderRadius: "50%",
-    background: "#3B7BF6",
-    boxShadow: "0 0 6px #3B7BF688",
+    display: "inline-block", width: 6, height: 6, borderRadius: "50%",
+    background: "#3B7BF6", boxShadow: "0 0 6px #3B7BF688",
     animation: "pulse 2s ease-in-out infinite",
   },
-  footerText: {
-    fontSize: 10,
-    color: "#4a5a6e",
-    letterSpacing: 1.5,
-  },
+  footerText: { fontSize: 10, color: "#4a5a6e", letterSpacing: 1.5 },
 };

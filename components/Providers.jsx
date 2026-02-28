@@ -5,8 +5,8 @@ import { base } from "wagmi/chains";
 export function Providers({ children }) {
   return (
     <MiniKitProvider
-      apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
       chain={base}
+      rpcUrl="https://mainnet.base.org"
       config={{
         appearance: {
           mode: "dark",
